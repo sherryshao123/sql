@@ -6,12 +6,33 @@ SELECT h2.name
 FROM (SELECT  ID1 AS first, ID2 AS second
 FROM friend 
 UNION
-SELECT ID2 AS first, ID1 As first
+SELECT ID2 AS first, ID1 As second
 FROM friend) AS candidates
 JOIN Highschooler h1 ON candidates.first = h1.id
 JOIN Highschooler h2 ON candidates.second = h2.id
-WHERE h1.name = "Gabriel"
-
+WHERE h1.name = 'Gabriel'
+-----------------------------------------------------
+ Hash Join  (cost=268.48..322.64 rows=816 width=32) (actual time=0.135..0.139 rows=5 loops=1)
+   Hash Cond: (h2.id = friend.id2)
+   ->  Seq Scan on highschooler h2  (cost=0.00..22.00 rows=1200 width=36) (actual time=0.007..0.009 rows=16 loops=1)
+   ->  Hash  (cost=266.78..266.78 rows=136 width=4) (actual time=0.114..0.114 rows=5 loops=1)
+         Buckets: 1024  Batches: 1  Memory Usage: 9kB
+         ->  Hash Join  (cost=158.07..266.78 rows=136 width=4) (actual time=0.077..0.109 rows=5 loops=1)
+               Hash Cond: (friend.id1 = h1.id)
+               ->  HashAggregate  (cost=133.00..178.20 rows=4520 width=8) (actual time=0.049..0.077 rows=40 loops=1)
+                     Group Key: friend.id1, friend.id2
+                     ->  Append  (cost=0.00..110.40 rows=4520 width=8) (actual time=0.004..0.029 rows=80 loops=1)
+                           ->  Seq Scan on friend  (cost=0.00..32.60 rows=2260 width=8) (actual time=0.003..0.007 rows=40 loops=1)
+                           ->  Seq Scan on friend friend_1  (cost=0.00..32.60 rows=2260 width=8) (actual time=0.005..0.011 rows=40 loops=1)
+               ->  Hash  (cost=25.00..25.00 rows=6 width=4) (actual time=0.013..0.013 rows=2 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     ->  Seq Scan on highschooler h1  (cost=0.00..25.00 rows=6 width=4) (actual time=0.003..0.005 rows=2 loops=1)
+                           Filter: (name = 'Gabriel'::text)
+                           Rows Removed by Filter: 14
+ Planning time: 0.168 ms
+ Execution time: 0.298 ms
+(19 rows)
+-----------------------
 
 
 Q2
